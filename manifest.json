@@ -1,0 +1,20 @@
+{
+  "manifest_version": 2,
+  "name": "zproxy",
+  "version": "0.1",
+  "description": "simple proxy switcher",
+  "applications": {
+    "gecko": {
+      "strict_min_version": "56.0a1"
+    }
+  },
+  "background": {
+    "scripts": [
+      "daemon.js"
+    ]
+  },
+  "permissions": [
+    "proxy",
+    "storage"
+  ]
+}
