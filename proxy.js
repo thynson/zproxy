@@ -1,5 +1,6 @@
 let blacklist = null;
 let whitelist = null;
+let proxy = null;
 function buildRule(rules) {
     "use strict";
     let blacklist = [];
@@ -8,27 +9,27 @@ function buildRule(rules) {
         return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
     };
 
-    let regexpcount = 0;
     function addRule(rule, list) {
         var match;
         if (match = rule.match(/^\|\|(.+)$/)) {
-            // console.log('domain:', match[1])
-            list.push(new RegExp(`^https?:\/\/${match[1]}`));
+            // Domain matching
+            list.push(`^https?:\/\/${match[1]}`);
         } else if (match = rule.match(/^\|(.+)$/)) {
-            // console.log('|match:', match[1])
-            list.push(new RegExp('^'+escapeRegexp(match[1])));
+            // Forward matching
+            list.push('^'+escapeRegexp(match[1]));
         } else if (match = rule.match(/(.+)\|$/)) {
-            // console.log('match|:', match[1])
+            // Backward matching, since browser don't tell us the path of url
+            // per PAC spec, ignore it at the first time
             // list.push(new RegExp(escapeRegexp(match[1]) + '$'));
         } else if (match = rule.match(/^\/(.+)\/$/)) {
-            // console.log('regex:', match[1])
-            list.push(new RegExp(match[1]));
+            // RegExp, convert named group to unnamed group
+            list.push(match[1].replace(/(?!\\)\(/g, '(?:'));
         } else {
-            // console.log(rule)
-            list.push(new RegExp(`${escapeRegexp(rule)}`))
-            regexpcount++;
+            // URL keyword, match domain and path of an HTTP url, only match
+            // domain of an HTTPS URL
+            list.push(`http:\/\/.*${escapeRegexp(rule)}`)
+            list.push(`https:\/\/[^/]*${escapeRegexp(rule)}[^/]*/`)
         }
-        // console.log(list[list.length-1].toString());
     }
 
     rules.split('\n')
@@ -45,12 +46,9 @@ function buildRule(rules) {
         });
 
 
-    // blacklist.forEach(console.log);
-    // whitelist.forEach(console.log);
-
-
-    blacklist = new RegExp(blacklist.map((r)=>`(?:${r.toString().slice(1,-1)})`).join('|'));
-    whitelist = new RegExp(whitelist.map((r)=>`(?:${r.toString().slice(1,-1)})`).join('|'));
+    // Join all rule and build Regexp
+    blacklist = new RegExp(blacklist.map((r)=>`(?:${r})`).join('|'));
+    whitelist = new RegExp(whitelist.map((r)=>`(?:${r})`).join('|'));
 
     return {
         blacklist,
@@ -64,6 +62,9 @@ browser.runtime.onMessage.addListener(message=> {
         let x = buildRule(message.value);
         blacklist = x.blacklist;
         whitelist = x.whitelist;
+    } else if (message.type === 'proxy') {
+        proxy = message.value;
+
     }
 });
 
@@ -75,7 +76,7 @@ function FindProxyForURL(url, host) {
     }
     if (blacklist != null) {
         if (blacklist.test(url))
-            return "SOCKS localhost:10080"; // Hard coded
+            return proxy || "DIRECT";// "SOCKS localhost:10080"; // Hard coded
     }
 
     return "DIRECT";

@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
-  "name": "zproxy",
+  "name": "proxyz",
   "version": "0.1",
-  "description": "simple proxy switcher",
+  "description": "Proxy switcher based on GFW List",
   "applications": {
     "gecko": {
       "strict_min_version": "56.0a1"
@@ -16,5 +16,10 @@
   "permissions": [
     "proxy",
     "storage"
-  ]
+  ],
+  "options_ui": {
+    "page":"settings.html",
+    "open_in_tab": true
+
+  }
 }
