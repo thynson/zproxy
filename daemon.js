@@ -13,8 +13,14 @@ fetch('https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt')
     .then(rule=> {
         console.info('Loaded GFW List');
         browser.runtime.sendMessage({type:'rule', value: rule},{toProxyScript: true})
-        let config = browser.storage.local.get()
-        if (config.type === 'DIRECT') {
+        return browser.storage.local.get();
+    }).then(config => {
+        if (!config.type) {
+             browser.runtime.sendMessage({
+                type: 'proxy',
+                message: 'DIRECT'
+            }, {toProxyScript: true});
+        } else if (config.type === 'DIRECT') {
             browser.runtime.sendMessage({
                 type: 'proxy',
                 message: config.type
