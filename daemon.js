@@ -28,7 +28,7 @@ fetch('https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt')
         } else {
             browser.runtime.sendMessage({
                 type: 'proxy',
-              value: `${config.type} ${config.hostname}:${config.port} ${config.user} ${config.password}`
+              value: `${config.type} ${config.host}:${config.port} ${config.username} ${config.password}`
             }, {
                 toProxyScript:true
             });

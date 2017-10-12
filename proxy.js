@@ -13,7 +13,7 @@ function buildRule(rules) {
         var match;
         if (match = rule.match(/^\|\|(.+)$/)) {
             // Domain matching
-            list.push(`^https?:\/\/${match[1]}`);
+            list.push(`^https?:\\/\\/[^/]*${escapeRegexp(match[1])}`);
         } else if (match = rule.match(/^\|(.+)$/)) {
             // Forward matching
             list.push('^'+escapeRegexp(match[1]));
@@ -27,8 +27,8 @@ function buildRule(rules) {
         } else {
             // URL keyword, match domain and path of an HTTP url, only match
             // domain of an HTTPS URL
-            list.push(`http:\/\/.*${escapeRegexp(rule)}`)
-            list.push(`https:\/\/[^/]*${escapeRegexp(rule)}[^/]*/`)
+            list.push(`http:\\/\\/.*${escapeRegexp(rule)}`)
+            list.push(`https:\\/\\/[^/]*${escapeRegexp(rule)}[^/]*`)
         }
     }
 

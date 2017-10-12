@@ -41,4 +41,5 @@ document.getElementById('form').onsubmit = function(e) {
 			toProxyScript:true
 		});
 	}
+	alert('Setting updated');
 }
